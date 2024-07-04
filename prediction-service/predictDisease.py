@@ -3,6 +3,11 @@ from flask_cors import CORS
 import pickle
 import os
 from pred import predictDiseases
+import py_eureka_client.eureka_client as eureka_client
+
+eureka_client.init(eureka_server="http://localhost:8761/eureka",
+                   app_name="disease-prediction-service",
+                   instance_port=8980)
 
 app = Flask(__name__)
 CORS(app)
@@ -17,7 +22,7 @@ def hello():
 
     return jsonify("Flask server running")
 
-@app.route('/predict', methods=["POST"])
+@app.route('/prediction-api/predict', methods=["POST"])
 def predict():
     data = request.form['data']
     print(data)
