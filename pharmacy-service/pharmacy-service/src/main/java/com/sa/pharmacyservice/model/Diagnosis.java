@@ -93,6 +93,13 @@ public class Diagnosis {
 		this.prescription = prescription;
 	}
 
+	@Override
+	public String toString() {
+		return "Diagnosis [id=" + id + ", patientId=" + patientId + ", doctorId=" + doctorId + ", symptoms=" + symptoms
+				+ ", diagnosis=" + diagnosis + ", appointmentId=" + appointmentId + ", prescription=" + prescription
+				+ "]";
+	}
+
 	public Diagnosis() {}
 
 }

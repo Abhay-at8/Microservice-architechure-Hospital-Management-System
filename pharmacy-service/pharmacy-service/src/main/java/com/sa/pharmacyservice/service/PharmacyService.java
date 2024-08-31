@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.sa.pharmacyservice.kafka.KafkaProducer;
 import com.sa.pharmacyservice.model.Diagnosis;
 import com.sa.pharmacyservice.model.Inventory;
 import com.sa.pharmacyservice.model.OrderlineItem;
@@ -28,9 +29,12 @@ public class PharmacyService {
 	@Autowired
 	OrderRepository orderRepository;
 	
+	@Autowired
+	KafkaProducer kafkaProducer;
 
     private RestTemplate restTemplate;
 
+//    older version without kafka 
 	public String createOrder(Long diagnosisId) {
 		
 		restTemplate=new RestTemplate();
@@ -56,6 +60,7 @@ public class PharmacyService {
 		    		 inv.setQuantity(inv.getQuantity()-prescription.getQuantity());
 		    		 ordLineItm.setStatus("In Stock");
 		    		 
+		    		 
 		    	 }
 		    	 else {
 			    	 BigDecimal zero=new BigDecimal(0);
@@ -78,6 +83,7 @@ public class PharmacyService {
 		}
 	     order.setOrderlineItems(orderlineItems);
 	     orderRepository.save(order);
+	     kafkaProducer.sendMessage(order);
 	     return "Order Created Sucessfully";
 		
 		
@@ -116,6 +122,58 @@ public class PharmacyService {
 			
 		}
 		return medicines;
+	}
+
+	public void createOrder1(Diagnosis diagnosis) {
+		// TODO Auto-generated method stub
+		System.out.println("Consumed diagnosis from kafka");
+		PharmacyOrder order=new PharmacyOrder();
+	     order.setTotalCharges(BigDecimal.valueOf(0, 0));
+	     order.setPatientId(diagnosis.getPatientId());
+	     order.setPrescriptionId(diagnosis.getId());
+	     Set<OrderlineItem> orderlineItems = new HashSet<>();
+	     for (Prescription prescription : diagnosis.getPrescription()) {
+	    	 OrderlineItem ordLineItm=new OrderlineItem();
+	    	 ordLineItm.setMedicineName(prescription.getMedicineName());
+	    	 
+	    	 Inventory inv=inventoryRepository.findByMedicineName(prescription.getMedicineName());
+	    	 if(inv!=null) {
+		    	 if(inv.getQuantity()>=prescription.getQuantity()) {
+		    		 ordLineItm.setUnitPrice(inv.getUnitPrice());
+		    		 ordLineItm.setQuantity(prescription.getQuantity());
+		    		 BigDecimal itemTotalCost=inv.getUnitPrice().multiply(BigDecimal.valueOf(prescription.getQuantity()));
+		    		 order.setTotalCharges(order.getTotalCharges().add(itemTotalCost));
+		    		 ordLineItm.setTotalPrice(itemTotalCost);
+		    		 inv.setQuantity(inv.getQuantity()-prescription.getQuantity());
+		    		 inventoryRepository.save(inv);
+		    		 ordLineItm.setStatus("In Stock");
+		    		 
+		    	 }
+		    	 else {
+			    	 BigDecimal zero=new BigDecimal(0);
+			    	 ordLineItm.setUnitPrice(zero);
+			    	 ordLineItm.setQuantity(0);
+			    	 ordLineItm.setTotalPrice(zero);
+			    	 ordLineItm.setStatus("Out of Stock");
+			    }
+	    	 }
+	    	 else {
+		    	 BigDecimal zero=new BigDecimal(0);
+		    	 ordLineItm.setUnitPrice(zero);
+		    	 ordLineItm.setQuantity(0);
+		    	 ordLineItm.setTotalPrice(zero);
+		    	 ordLineItm.setStatus("Out of Stock");
+	    	 }
+	    	 
+	    	 orderlineItems.add(ordLineItm);
+	    	 
+		}
+	     order.setOrderlineItems(orderlineItems);
+	     
+	     orderRepository.save(order);
+	     
+	     //kafkaProducer.sendMessage(order);
+		
 	}
 
 	

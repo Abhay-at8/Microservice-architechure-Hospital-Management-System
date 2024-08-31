@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sa.appointmentservice.kafka.KafkaProducer;
 import com.sa.appointmentservice.model.Appointment;
 import com.sa.appointmentservice.model.Diagnosis;
 import com.sa.appointmentservice.repository.AppointmentRepository;
@@ -23,6 +24,8 @@ public class AppointmentService {
 	@Autowired
 	AppointmentRepository appointmentRepository;
 
+	@Autowired
+	KafkaProducer kafkaProducer;
 	
 	public List<Diagnosis> getDiagnosis(){
 		return diagnosisRepository.findAll();
@@ -32,6 +35,7 @@ public class AppointmentService {
 		
 		Optional<Appointment> aptOpt = appointmentRepository.findById(diagnosis.getAppointmentId());
 		diagnosisRepository.save(diagnosis);
+		kafkaProducer.sendMessage(diagnosis);
 		
 		if(aptOpt.isPresent()) {
 			

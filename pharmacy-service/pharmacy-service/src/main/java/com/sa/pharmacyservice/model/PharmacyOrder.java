@@ -152,6 +152,16 @@ public class PharmacyOrder {
 
 
 
+	@Override
+	public String toString() {
+		return "PharmacyOrder [id=" + id + ", patientId=" + patientId + ", doctorId=" + doctorId + ", prescriptionId="
+				+ prescriptionId + ", doDelivery=" + doDelivery + ", deliveryCharges=" + deliveryCharges
+				+ ", totalCharges=" + totalCharges + ", orderlineItems=" + orderlineItems + "]";
+	}
+
+
+
+
 	public PharmacyOrder(Long id, Long patientId, Long doctorId, Long prescriptionId, Boolean doDelivery,
 			BigDecimal deliveryCharges, BigDecimal totalCharges, Set<OrderlineItem> orderlineItems) {
 		super();
