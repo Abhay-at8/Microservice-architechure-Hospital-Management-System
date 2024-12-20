@@ -1,6 +1,7 @@
 package com.sa.apigateway;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +16,9 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 	
 	@Autowired
 	private RestTemplate template;
+	
+	@Value("${auth.url}")
+	private String url;
 	
 	public AuthenticationFilter() {
 		super(Config.class);
@@ -34,7 +38,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 				}
 				
 				try {
-					String res=template.getForObject("http://localhost:8080/auth/validate?token="+authHeader, String.class);
+					System.out.println(url);
+					String res=template.getForObject(url+authHeader, String.class);
 //					String res=template.getForObject("http://localhost:8080/auth/", String.class);
 						System.out.println("Rest template output is "+res);
 				} catch (Exception e) {

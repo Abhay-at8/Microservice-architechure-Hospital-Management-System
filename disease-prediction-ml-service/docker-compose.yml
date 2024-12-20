@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  eureka-server:
+    image: eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+
+  ml-service:
+    image: abhayat8/ml-service
+    container_name: ml-service
+    ports:
+      - "8980:8980"
+    environment:
+      - EUREKA_HOST=eureka-server
+    depends_on:
+      - eureka-server
+

@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  mysql:
+    container_name: mysql
+    image: mysql
+    volumes:
+      -  /home/abhay/docdb:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: doctor
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3307:3306"
+    networks:
+      - eureka-network
+
+  auth_db:
+    container_name: auth_db
+    image: mysql
+    volumes:
+      -  /home/abhay/authdb:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: authentication
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3308:3306"
+    networks:
+      - eureka-network
+    depends_on:
+      - mysql
+
+  eureka-server:
+    image: abhayat8/eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - eureka-network
+    depends_on:
+      - mysql
+
+  doctor-service:
+    image: abhayat8/doctor-service
+    container_name: doctor-service
+    environment:
+      MYSQL_HOST: mysql
+      EUREKA_HOST: eureka-server
+      
+    ports:
+      - "8081:8081"
+    networks:
+      - eureka-network
+    depends_on:
+      - eureka-server
+      - mysql
+      - api-gateway
+      - auth-service
+
+  auth-service:
+    image: abhayat8/auth-service
+    container_name: auth-service
+    environment:
+      AUTH_DB: auth_db
+      EUREKA_HOST: eureka-server
+      
+    ports:
+      - "8087:8087"
+    networks:
+      - eureka-network
+    depends_on:
+      - eureka-server
+      - auth_db
+      - api-gateway
+      
+
+  api-gateway:
+    image: abhayat8/api-gateway
+    container_name: api-gateway
+    environment:
+      EUREKA_HOST: eureka-server
+      GATEWAY_HOST: api-gateway
+      DOC_SERVICE: doctor-service
+      AUTH_SERVICE: auth-service
+      
+    ports:
+      - "8080:8080"
+    networks:
+      - eureka-network
+    depends_on:
+      - eureka-server
+
+networks:
+  eureka-network:
+    driver: bridge
+

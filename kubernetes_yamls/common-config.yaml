@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-config
+data:
+  MYSQL_HOST: terraform-20241130081534231200000002.clq88wy6cwq7.ap-south-1.rds.amazonaws.com
+  EUREKA_HOST: eureka-service
+  KAFKA_HOST: 3.110.120.223
+  DB_USER: admin  
+  DB_PASSWORD: password  

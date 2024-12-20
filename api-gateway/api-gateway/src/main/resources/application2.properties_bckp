@@ -34,29 +34,36 @@ spring:
           uri: http://${DOC_SERVICE:localhost}:8081
           predicates:
             - Path=/doctor-api/**
+          filters:
+            - AuthenticationFilter
             
         - id: patient_service
           uri: http://${PATIENT_SERVICE:localhost}:8082
           predicates:
             - Path=/patient-api/**
+          filters:
+            - AuthenticationFilter
         
         - id: appointment_service
           uri: http://${APPOINTMENT_SERVICE:localhost}:8083
           predicates:
             - Path=/appointment-api/**
-
+          filters:
+            - AuthenticationFilter
             
         - id: pharmacy_service
           uri: http://${PHARMACY_SERVICE:localhost}:8085
           predicates:
             - Path=/pharmacy-api/**
-
+          filters:
+            - AuthenticationFilter
             
         - id: disease-prediction-service
           uri: http://${ML_SERVICE:localhost}:8980
           predicates:
             - Path=/prediction-api/**
-       
+          filters:
+            - AuthenticationFilter        
         - id: sparks-service
           uri: http://${SPARKS_SERVICE:localhost}:8985
           predicates:

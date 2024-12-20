@@ -172,7 +172,7 @@ public class PharmacyService {
 	     
 	     orderRepository.save(order);
 	     
-	     //kafkaProducer.sendMessage(order);
+	     kafkaProducer.sendMessage(order);
 		
 	}
 
